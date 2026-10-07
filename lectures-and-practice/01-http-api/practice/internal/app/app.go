@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	" http-api-practice/internal/api"
-	" http-api-practice/internal/httpapi"
-	" http-api-practice/internal/logging"
+	"http-api-practice/internal/api"
+	"http-api-practice/internal/httpapi"
+	"http-api-practice/internal/logging"
 )
 
 // New wires the generated routes, handlers, and request logging middleware.
