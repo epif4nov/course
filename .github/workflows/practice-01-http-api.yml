@@ -1,0 +1,27 @@
+name: Practice 01 HTTP API
+
+on:
+  push:
+    branches: [practice/02-04-solutions]
+    paths:
+      - "lectures-and-practice/01-http-api/practice/**"
+      - ".github/workflows/practice-01-http-api.yml"
+  pull_request:
+    paths:
+      - "lectures-and-practice/01-http-api/practice/**"
+      - ".github/workflows/practice-01-http-api.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lectures-and-practice/01-http-api/practice
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.x"
+          cache-dependency-path: lectures-and-practice/01-http-api/practice/go.mod
+      - run: go generate ./...
+      - run: go test ./...
