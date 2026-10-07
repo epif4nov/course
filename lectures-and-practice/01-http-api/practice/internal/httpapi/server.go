@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	" http-api-practice/internal/api"
+	"http-api-practice/internal/api"
 )
 
 // Server implements the generated OpenAPI handlers with static in-memory data.
