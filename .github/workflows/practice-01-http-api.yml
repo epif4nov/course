@@ -1,14 +1,18 @@
-name: Practice 01 HTTP API
+name: Validate practices 01-03
 
 on:
   push:
     branches: [practice/02-04-solutions]
     paths:
       - "lectures-and-practice/01-http-api/practice/**"
+      - "lectures-and-practice/02-postgresql/practice/**"
+      - "lectures-and-practice/03-code-quality/practice/**"
       - ".github/workflows/practice-01-http-api.yml"
   pull_request:
     paths:
       - "lectures-and-practice/01-http-api/practice/**"
+      - "lectures-and-practice/02-postgresql/practice/**"
+      - "lectures-and-practice/03-code-quality/practice/**"
       - ".github/workflows/practice-01-http-api.yml"
 
 jobs:
@@ -21,8 +25,25 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.23.x"
-          cache-dependency-path: lectures-and-practice/01-http-api/practice/go.mod
+          go-version: "1.25.x"
+          cache-dependency-path: |
+            lectures-and-practice/01-http-api/practice/go.mod
+            lectures-and-practice/02-postgresql/practice/go.mod
+            lectures-and-practice/03-code-quality/practice/go.mod
       - run: go generate ./...
       - run: go mod tidy
       - run: go test ./...
+      - run: go test ./...
+        working-directory: lectures-and-practice/02-postgresql/practice
+      - run: go generate ./...
+        working-directory: lectures-and-practice/03-code-quality/practice
+      - run: go mod tidy
+        working-directory: lectures-and-practice/03-code-quality/practice
+      - run: go test ./...
+        working-directory: lectures-and-practice/03-code-quality/practice
+      - run: go test -race ./03-quality-checks
+        working-directory: lectures-and-practice/03-code-quality/practice
+      - run: go test -tags=leaktest ./03-quality-checks
+        working-directory: lectures-and-practice/03-code-quality/practice
+      - name: Run golangci-lint
+        run: docker run --rm -v "$GITHUB_WORKSPACE/lectures-and-practice/03-code-quality/practice:/app" -w /app golangci/golangci-lint:v2.14.0 golangci-lint run ./04-linters
