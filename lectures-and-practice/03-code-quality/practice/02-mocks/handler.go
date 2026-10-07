@@ -1,19 +1,22 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=handler.go -destination=mocks/greeter_mock.go -package=mocks
 
-// TODO: объявите здесь минимальный интерфейс для зависимости обработчика.
-
-type Handler struct {
-	service *GreetingService
+type Greeter interface {
+	Greet(context.Context, string) (string, error)
 }
 
-func NewHandler(service *GreetingService) *Handler {
+type Handler struct {
+	service Greeter
+}
+
+func NewHandler(service Greeter) *Handler {
 	return &Handler{service: service}
 }
 

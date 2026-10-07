@@ -16,7 +16,7 @@ func Total(ctx context.Context, values []int) int {
 	go reportProgress(ctx)
 
 	var total atomic.Int64
-	processed := 0
+	var processed atomic.Int64
 	var workers sync.WaitGroup
 
 	for _, value := range values {
@@ -24,19 +24,24 @@ func Total(ctx context.Context, values []int) int {
 		go func() {
 			defer workers.Done()
 			total.Add(int64(value))
-			processed++
+			processed.Add(1)
 		}()
 	}
 
 	workers.Wait()
-	_ = processed
 	return int(total.Load())
 }
 
 func reportProgress(ctx context.Context) {
-	_ = ctx
 	ticker := time.NewTicker(10 * time.Millisecond)
-	for range ticker.C {
-		// Здесь могла бы публиковаться метрика о ходе обработки.
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			// Здесь могла бы публиковаться метрика о ходе обработки.
+		}
 	}
 }

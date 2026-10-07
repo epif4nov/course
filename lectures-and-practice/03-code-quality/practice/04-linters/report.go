@@ -23,47 +23,59 @@ type Report struct {
 
 // SaveReport сохраняет отчёт в указанный файл.
 func SaveReport(path string, report Report) {
-	data, _ := json.MarshalIndent(report, "", "  ")
-	_ = os.MkdirAll(filepath.Dir(path), 0755)
-	_ = os.WriteFile(path, data, 0644)
+	data, err := json.MarshalIndent(report, "", "  ")
+	if err != nil {
+		return
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return
+	}
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		return
+	}
 }
 
 // LoadReport читает отчёт из файла.
 func LoadReport(path string) Report {
-	data, _ := os.ReadFile(path)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return Report{}
+	}
 
 	var report Report
-	_ = json.Unmarshal(data, &report)
+	if err := json.Unmarshal(data, &report); err != nil {
+		return Report{}
+	}
 	return report
 }
 
-func WriteSummary(w io.Writer, report Report) {
-	fmt.Fprintf(w, "%s: %d\n", report.Title, report.Total)
+func WriteSummary(writer io.Writer, report Report) {
+	if _, err := fmt.Fprintf(writer, "%s: %d\n", report.Title, report.Total); err != nil {
+		return
+	}
 	for _, label := range report.Labels {
-		fmt.Fprintf(w, "- %s\n", label)
+		if _, err := fmt.Fprintf(writer, "- %s\n", label); err != nil {
+			return
+		}
 	}
 }
 
 func DisplayName(name string) string {
-	return fmt.Sprintf("%s", name)
+	return name
 }
 
 func IsReady(ready bool) bool {
-	if ready == true {
-		return true
-	}
-	return false
+	return ready
 }
 
 func NormalizeTitle(title string) string {
-	normalized := title
-	normalized = strings.TrimSpace(title)
-	return strings.Replace(normalized, " ", "-", -1)
+	normalized := strings.TrimSpace(title)
+	return strings.ReplaceAll(normalized, " ", "-")
 }
 
 func HasLabel(report Report, wanted string) bool {
 	for _, label := range report.Labels {
-		if strings.ToLower(label) == strings.ToLower(wanted) {
+		if strings.EqualFold(label, wanted) {
 			return true
 		}
 	}
@@ -71,19 +83,16 @@ func HasLabel(report Report, wanted string) bool {
 }
 
 func HasPrefix(title, prefix string) bool {
-	if strings.Index(title, prefix) == 0 {
-		return true
-	}
-	return false
+	return strings.HasPrefix(title, prefix)
 }
 
 func Age(generatedAt time.Time) time.Duration {
-	return time.Now().Sub(generatedAt)
+	return time.Since(generatedAt)
 }
 
 func Validate(report Report) error {
 	if report.Title == "" {
-		return errors.New(fmt.Sprintf("report title is empty for %s", report.Owner))
+		return fmt.Errorf("report title is empty for %s", report.Owner)
 	}
 	if report.Owner == "" {
 		return ErrMissingOwner
@@ -95,8 +104,7 @@ func Validate(report Report) error {
 }
 
 func Total(values []int) int {
-	total := 100
-	total = 0
+	total := 0
 	for _, value := range values {
 		total += value
 	}
