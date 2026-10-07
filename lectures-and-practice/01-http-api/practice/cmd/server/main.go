@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	" http-api-practice/internal/app"
+	"http-api-practice/internal/app"
 )
 
 func main() {
