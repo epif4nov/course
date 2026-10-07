@@ -12,6 +12,7 @@
 
 ```bash
 go generate ./...
+go mod tidy
 go test ./...
 go run ./cmd/server
 ```
